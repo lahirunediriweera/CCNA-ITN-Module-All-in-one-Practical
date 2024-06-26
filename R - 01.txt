@@ -1,0 +1,68 @@
+R-01>enable
+R-01#clock set 01:01:20 24 June 2024
+R-01#show clock
+
+R-01#configure terminal
+R-01(config)#hostname R-01
+
+R-01#configure terminal
+R-01(config)#banner motd *
+################################################# 
+This is a Secure area.Pls enter your Authentication. 
+################################################# *
+
+R-01(config)#interface gigabitEthernet 0/0/0
+R-01(config-if)#description SW-01-Link
+R-01(config-if)#ip address 172.16.1.1 255.255.255.128
+R-01(config-if)#ip helper-address 172.16.0.3
+R-01(config-if)#no shutdown
+R-01(config-if)#exit
+
+R-01(config)#interface gigabitEthernet 0/0/1
+R-01(config-if)#description SW-02-Link
+R-01(config-if)#ip address 172.16.1.129 255.255.255.192
+R-01(config-if)#ip helper-address 172.16.0.3
+R-01(config-if)#no shutdown
+R-01(config-if)#exit
+
+R-01(config)#interface serial 0/1/0
+R-01(config-if)#description R-02-Link
+R-01(config-if)#ip address 172.16.2.1 255.255.255.252
+R-01(config-if)#clock rate 64000
+R-01(config-if)#no shutdown
+R-01(config-if)#exit
+
+R-01(config)#enable secret Lahiru.cisco.lk
+R-01(config)#line console 0
+R-01(config-line)#password lAhiru.cisco.lk
+R-01(config-line)#exec-timeout 15
+R-01(config-line)#login
+R-01(config-line)#exit
+
+R-01(config)#username Admin secret AdMin@Ci$co
+R-01(config)#ip domain-name cisco.lk
+
+R-01(config)#crypto key generate rsa
+1024
+R-01(config)#ip ssh version 2
+
+R-01(config)#line vty 0
+R-01(config-line)#transport input ssh
+R-01(config-line)#login local
+R-01(config-line)#exec-timeout 15
+R-01(config-line)#exit
+
+R-01(config)#service password-encryption 
+
+R-01(config)#security passwords min-length 8
+
+R-01(config)#login block 300 attempts 3 within 60
+
+R-01(config)#ip route 172.16.1.192 255.255.255.192 172.16.2.2
+R-01(config)#ip route 172.16.0.0 255.255.255.0 172.16.2.2
+
+R-01#copy running-config startup-config 
+
+R-01#copy startup-config tftp: 
+Address or name of remote host []? 172.16.0.2
+Destination filename [R-01-confg]? 
